@@ -1,0 +1,11 @@
+
+body {
+    background-color: rgb(161, 161, 161);
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    text-align: center;
+}
+
+.buttonCenter {
+    display: grid;
+    justify-content: center;
+}
