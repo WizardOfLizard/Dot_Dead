@@ -103,10 +103,11 @@ function drawBullets () {
     }
 }
 
+
+
 //Makes canvas and is useful for debugging
 function setup () {
     createCanvas(600, 600)
-    spawnEnemy(300, 100)
 }
 
 //Runs repeatedly, most important stuff happens here

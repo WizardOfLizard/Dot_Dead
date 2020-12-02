@@ -9,3 +9,12 @@ body {
     display: grid;
     justify-content: center;
 }
+
+.remove {
+    display: none;
+}
+
+p {
+    padding-left: 30%;
+    width: 40%;
+}
