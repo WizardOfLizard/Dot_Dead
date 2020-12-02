@@ -1,5 +1,5 @@
 
-console.log("Hello World.")
+//Math.sin(theta)
 
 //self explainitory
 let gameRunning = false
@@ -9,7 +9,7 @@ let reload = 100
 
 let bulletSpeed = 10
 
-let playerSpeed = 35
+let playerSpeed = 5
 
 let enemySpeed = 20
 
@@ -17,8 +17,8 @@ let enemySpeed = 20
 let waveNum = 0;
 
 //stores all data on the player
-//postion(x, y), number of lives, and reload timer
-let player = {x:300, y:300, lives:3, bulletTimer:0}
+//postion(x, y), velocity(x, y), number of lives, and reload timer
+let player = {x:300, y:300, xVel:0, yVel:0, lives:3, bulletTimer:0}
 
 //enemies contains the positions, states, bullet timers, and statuses of all enemies
 //Format: {x:number, y:number, state:string, bulletTimer:number, stat:alive/dead}
@@ -103,7 +103,11 @@ function drawBullets () {
     }
 }
 
-
+//self explainitory
+function movePlayer () {
+    player.x += player.xVel
+    player.y += player.yVel
+}
 
 //Makes canvas and is useful for debugging
 function setup () {
@@ -117,4 +121,36 @@ function draw () {
     drawPlayer()
     drawEnemies()
     drawBullets()
+
+    movePlayer()
+}
+
+//prevents speed from persisting while keys are not held
+function keyReleased () {
+    player.xVel = 0
+    player.yVel = 0
+}
+
+//makes player move when keys are pressed, uses else if statements to prevent glitches
+function keyPressed () {
+    if(keyCode === 87) {
+        player.yVel = -playerSpeed
+    } else if (keyCode === 38) {
+        player.yVel = -playerSpeed
+    }
+    if(keyCode === 65) {
+        player.xVel = -playerSpeed
+    } else if (keyCode === 37) {
+        player.xVel = -playerSpeed
+    }
+    if(keyCode === 83) {
+        player.yVel = playerSpeed
+    } else if (keyCode === 40) {
+        player.yVel = playerSpeed
+    }
+    if(keyCode === 68) {
+        player.xVel = playerSpeed
+    } else if (keyCode === 39) {
+        player.xVel = playerSpeed
+    }
 }
