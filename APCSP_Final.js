@@ -5,7 +5,7 @@
 let gameRunning = false
 
 //variables for design
-let reload = 100
+let reload = 30
 
 let bulletSpeed = 10
 
@@ -27,6 +27,34 @@ let enemies = []
 //bullets contains the positions, trajectories, affiliations, and statuses of all bullets
 //Format: {x:number, y:number, ang:number(angle), afil:friend/foe, stat:live/dead}
 let bullets = []
+
+//calculates angle between player and mouse. range[3pi/2, -pi/2)
+function calcMouseAngle () {
+    let xDist = mouseX - player.x
+    let yDist = mouseY - player.y
+    if (mouseX < player.x) {
+        return Math.atan(yDist/xDist)+Math.PI
+    } else {
+        return Math.atan(yDist/xDist)
+    }
+}
+
+function checkBulletBounds () {
+    bullets.forEach(bullet => {
+        if (bullet.x < 0) {
+            bullet.stat = "dead"
+        }
+        if (bullet.y < 0) {
+            bullet.stat = "dead"
+        }
+        if (bullet.x > 600) {
+            bullet.stat = "dead"
+        }
+        if (bullet.x > 600) {
+            bullet.stat = "dead"
+        }
+    })
+}
 
 //clear enemies that are dead
 function trimEnemies () {
@@ -109,6 +137,20 @@ function movePlayer () {
     player.y += player.yVel
 }
 
+function moveBullets () {
+    bullets.forEach(bullet => {
+        bullet.x += bulletSpeed*Math.cos(bullet.ang)
+        bullet.y += bulletSpeed*Math.sin(bullet.ang)
+    })
+}
+
+function passBulletTimer () {
+    player.bulletTimer --
+    enemies.forEach(enemy => {
+        enemy.bulletTimer --
+    })
+}
+
 //Makes canvas and is useful for debugging
 function setup () {
     createCanvas(600, 600)
@@ -123,6 +165,13 @@ function draw () {
     drawBullets()
 
     movePlayer()
+    moveBullets()
+
+    passBulletTimer()
+
+    checkBulletBounds()
+
+    trimBullets()
 }
 
 //prevents speed from persisting while keys are not held
@@ -152,5 +201,13 @@ function keyPressed () {
         player.xVel = playerSpeed
     } else if (keyCode === 39) {
         player.xVel = playerSpeed
+    }
+}
+
+//called when player clicks, spawns a bullet
+function mouseClicked () {
+    if (player.bulletTimer < 1) {
+        spawnBullet(player.x, player.y, calcMouseAngle(), "friend")
+        player.bulletTimer = reload
     }
 }
