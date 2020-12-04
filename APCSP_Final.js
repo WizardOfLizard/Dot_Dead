@@ -3,6 +3,7 @@
 
 //self explainitory
 let gameRunning = false
+let gameStarted = false
 
 //variables for design
 let reload = 30
@@ -131,6 +132,35 @@ function drawBullets () {
     }
 }
 
+function drawUI () {
+    noStroke()
+    fill(7, 172, 232)
+    textAlign(LEFT, TOP)
+    textSize(20)
+    text(`Lives: ${player.lives}`, 20, 20)
+    fill(224, 54, 54)
+    textAlign(RIGHT, TOP)
+    textSize(20)
+    text(`Wave: ${waveNum}`, 580, 20)
+    if (gameStarted === false) {
+        fill(150, 150, 150, 100)
+        rect(0, 0, 600, 600)
+        fill(0, 0, 0)
+        textAlign(CENTER, CENTER)
+        textSize(40)
+        text("Press Space to Start", 300, 300)
+    } else {
+        if (gameRunning === false) {
+            fill(150, 150, 150, 100)
+            rect(0, 0, 600, 600)
+            fill(0, 0, 0)
+            textAlign(CENTER, CENTER)
+            textSize(40)
+            text("Press Space to Resume", 300, 300)
+        }
+    }
+}
+
 //self explainitory
 function movePlayer () {
     player.x += player.xVel
@@ -160,18 +190,23 @@ function setup () {
 function draw () {
     background(255, 255, 255)
     
-    drawPlayer()
-    drawEnemies()
     drawBullets()
+    drawEnemies()
+    drawPlayer()
 
-    movePlayer()
-    moveBullets()
+    drawUI()
 
-    passBulletTimer()
+    if (gameRunning === true) {
+        movePlayer()
+        moveBullets()
+
+        passBulletTimer()
+    }
 
     checkBulletBounds()
 
     trimBullets()
+    trimEnemies()
 }
 
 //prevents speed from persisting while keys are not held
@@ -182,31 +217,44 @@ function keyReleased () {
 
 //makes player move when keys are pressed, uses else if statements to prevent glitches
 function keyPressed () {
-    if(keyCode === 87) {
+    if (keyCode === 87) {
         player.yVel = -playerSpeed
     } else if (keyCode === 38) {
         player.yVel = -playerSpeed
     }
-    if(keyCode === 65) {
+    if (keyCode === 65) {
         player.xVel = -playerSpeed
     } else if (keyCode === 37) {
         player.xVel = -playerSpeed
     }
-    if(keyCode === 83) {
+    if (keyCode === 83) {
         player.yVel = playerSpeed
     } else if (keyCode === 40) {
         player.yVel = playerSpeed
     }
-    if(keyCode === 68) {
+    if (keyCode === 68) {
         player.xVel = playerSpeed
     } else if (keyCode === 39) {
         player.xVel = playerSpeed
     }
 }
 
+function keyTyped () {
+    if (keyCode === 32) {
+        if (gameRunning === false) {
+            gameRunning = true
+            gameStarted = true
+            console.log("Game playing")
+        } else {
+            gameRunning = false
+            console.log("Game paused")
+        }
+    }
+}
+
 //called when player clicks, spawns a bullet
 function mouseClicked () {
-    if (player.bulletTimer < 1) {
+    if (player.bulletTimer < 1 && gameRunning === true) {
         spawnBullet(player.x, player.y, calcMouseAngle(), "friend")
         player.bulletTimer = reload
     }
