@@ -8,7 +8,7 @@ let gameStarted = false
 //variables for design
 let reload = 30
 
-let bulletSpeed = 10
+let bulletSpeed = 7
 
 let playerSpeed = 5
 
@@ -38,6 +38,12 @@ function calcMouseAngle () {
     } else {
         return Math.atan(yDist/xDist)
     }
+}
+
+function calcDist (p1x, p1y, p2x, p2y) {
+    let xDist = p1x - p2x
+    let yDist = p1y - p2y
+    return Math.sqrt(xDist*xDist + yDist*yDist)
 }
 
 function checkBulletBounds () {
@@ -213,6 +219,23 @@ function moveBullets () {
     })
 }
 
+function collideBullets () {
+    bullets.forEach(bullet => {
+        if (bullet.stat === "live") {
+            enemies.forEach(enemy => {
+                if (bullet.affil === "friend" && enemy.stat === "alive" && calcDist(bullet.x, bullet.y, enemy.x, enemy.y) <= 35) {
+                    bullet.stat = "dead"
+                    enemy.stat = "dead"
+                }
+            })
+            if (bullet.affil === "foe" && calcDist(bullet.x, bullet.y, player.x, player.y) <= 35) {
+                bullet.stat = "dead"
+                player.lives --;
+            }
+        }
+    })
+}
+
 function passBulletTimer () {
     player.bulletTimer --
     enemies.forEach(enemy => {
@@ -240,6 +263,8 @@ function draw () {
 
         movePlayer()
         moveBullets()
+
+        collideBullets()
 
         passBulletTimer()
     }
