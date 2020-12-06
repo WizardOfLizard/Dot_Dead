@@ -161,6 +161,45 @@ function drawUI () {
     }
 }
 
+function accPlayer () {
+    //governs UP and W keys
+    if (player.yVel > -playerSpeed && keyIsDown(87)) {
+        player.yVel -= playerSpeed/5
+    } else if (player.yVel > -playerSpeed && keyIsDown(38)) {
+        player.yVel -= playerSpeed/5
+    }
+    //governs LEFT and A keys
+    if (player.xVel > -playerSpeed && keyIsDown(65)) {
+        player.xVel -= playerSpeed/5
+    } else if (player.xVel > -playerSpeed && keyIsDown(37)) {
+        player.xVel -= playerSpeed/5
+    }
+    //governs DOWN and S keys
+    if (player.yVel < playerSpeed && keyIsDown(83)) {
+        player.yVel += playerSpeed/5
+    } else if (player.yVel < playerSpeed && keyIsDown(40)) {
+        player.yVel += playerSpeed/5
+    }
+    //governs RIGHT and D keys
+    if (player.xVel < playerSpeed && keyIsDown(68)) {
+        player.xVel += playerSpeed/5
+    } else if (player.xVel < playerSpeed && keyIsDown(39)) {
+        player.xVel += playerSpeed/5
+    }
+    //decelarates player vertically when no keys are pressed
+    if (player.yVel > 0 && !keyIsDown(87) && !keyIsDown(38) && !keyIsDown(83) && !keyIsDown(40)) {
+        player.yVel -= playerSpeed/5
+    } else if (player.yVel < 0 && !keyIsDown(87) && !keyIsDown(38) && !keyIsDown(83) && !keyIsDown(40)) {
+        player.yVel += playerSpeed/5
+    }
+    //decelarates player horizontally when no keys are pressed
+    if (player.xVel > 0 && !keyIsDown(65) && !keyIsDown(37) && !keyIsDown(68) && !keyIsDown(39)) {
+        player.xVel -= playerSpeed/5
+    } else if (player.xVel < 0 && !keyIsDown(65) && !keyIsDown(37) && !keyIsDown(68) && !keyIsDown(39)) {
+        player.xVel += playerSpeed/5
+    }
+}
+
 //self explainitory
 function movePlayer () {
     player.x += player.xVel
@@ -197,6 +236,8 @@ function draw () {
     drawUI()
 
     if (gameRunning === true) {
+        accPlayer()
+
         movePlayer()
         moveBullets()
 
@@ -207,36 +248,6 @@ function draw () {
 
     trimBullets()
     trimEnemies()
-}
-
-//prevents speed from persisting while keys are not held
-function keyReleased () {
-    player.xVel = 0
-    player.yVel = 0
-}
-
-//makes player move when keys are pressed, uses else if statements to prevent glitches
-function keyPressed () {
-    if (keyCode === 87) {
-        player.yVel = -playerSpeed
-    } else if (keyCode === 38) {
-        player.yVel = -playerSpeed
-    }
-    if (keyCode === 65) {
-        player.xVel = -playerSpeed
-    } else if (keyCode === 37) {
-        player.xVel = -playerSpeed
-    }
-    if (keyCode === 83) {
-        player.yVel = playerSpeed
-    } else if (keyCode === 40) {
-        player.yVel = playerSpeed
-    }
-    if (keyCode === 68) {
-        player.xVel = playerSpeed
-    } else if (keyCode === 39) {
-        player.xVel = playerSpeed
-    }
 }
 
 function keyTyped () {
