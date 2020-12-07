@@ -29,14 +29,14 @@ let enemies = []
 //Format: {x:number, y:number, ang:number(angle), afil:friend/foe, stat:live/dead}
 let bullets = []
 
-//calculates angle between player and mouse. range[3pi/2, -pi/2)
-function calcMouseAngle () {
-    let xDist = mouseX - player.x
-    let yDist = mouseY - player.y
-    if (mouseX < player.x) {
-        return Math.atan(yDist/xDist)+Math.PI
-    } else {
+//calculates angle between two points. range[3pi/2, -pi/2)
+function calcAngle (p1x, p1y, p2x, p2y) {
+    let xDist = p1x - p2x
+    let yDist = p1y - p2y
+    if (p1x < p2x) {
         return Math.atan(yDist/xDist)
+    } else {
+        return Math.atan(yDist/xDist)+Math.PI
     }
 }
 
@@ -91,7 +91,7 @@ function trimBullets () {
 
 //spawns enemies with according attributes
 function spawnEnemy (xPos, yPos) {
-    enemies.push({x: xPos, y: yPos, state: "Spawned", bulletTimer: 100, stat: "alive"})
+    enemies.push({x: xPos, y: yPos, state: "Spawned", bulletTimer: reload*2, stat: "alive"})
     console.log(`Enemy spawned @ (${xPos}, ${yPos})`)
 }
 
@@ -206,6 +206,15 @@ function accPlayer () {
     }
 }
 
+function enemiesShoot () {
+    enemies.forEach(enemy => {
+        if (enemy.bulletTimer <= 0 &&  gameRunning) {
+            spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe")
+            enemy.bulletTimer = reload*2 + Math.round(Math.random(1, 50))
+        }
+    })
+}
+
 //self explainitory
 function movePlayer () {
     player.x += player.xVel
@@ -246,6 +255,8 @@ function passBulletTimer () {
 //Makes canvas and is useful for debugging
 function setup () {
     createCanvas(600, 600)
+
+    spawnEnemy(300, 100)
 }
 
 //Runs repeatedly, most important stuff happens here
@@ -263,6 +274,8 @@ function draw () {
 
         movePlayer()
         moveBullets()
+
+        enemiesShoot()
 
         collideBullets()
 
@@ -291,7 +304,7 @@ function keyTyped () {
 //called when player clicks, spawns a bullet
 function mouseClicked () {
     if (player.bulletTimer < 1 && gameRunning === true) {
-        spawnBullet(player.x, player.y, calcMouseAngle(), "friend")
+        spawnBullet(player.x, player.y, calcAngle(player.x, player.y, mouseX, mouseY), "friend")
         player.bulletTimer = reload
     }
 }
