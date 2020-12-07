@@ -1,5 +1,4 @@
 
-//Math.sin(theta)
 
 //self explainitory
 let gameRunning = false
@@ -12,7 +11,7 @@ let bulletSpeed = 7
 
 let playerSpeed = 5
 
-let enemySpeed = 20
+let enemySpeed = 5
 
 //Counts how many waves have been sent on player, used for difficulty and score
 let waveNum = 0;
@@ -22,7 +21,7 @@ let waveNum = 0;
 let player = {x:300, y:300, xVel:0, yVel:0, lives:3, bulletTimer:0}
 
 //enemies contains the positions, states, bullet timers, and statuses of all enemies
-//Format: {x:number, y:number, state:string, bulletTimer:number, stat:alive/dead}
+//Format: {x:number, y:number, state:thinking/long/mid/short, bulletTimer:number, stat:alive/dead}
 let enemies = []
 
 //bullets contains the positions, trajectories, affiliations, and statuses of all bullets
@@ -91,14 +90,13 @@ function trimBullets () {
 
 //spawns enemies with according attributes
 function spawnEnemy (xPos, yPos) {
-    enemies.push({x: xPos, y: yPos, state: "Spawned", bulletTimer: reload*2, stat: "alive"})
+    enemies.push({x: xPos, y: yPos, state: "thinking", bulletTimer: reload*2, stat: "alive"})
     console.log(`Enemy spawned @ (${xPos}, ${yPos})`)
 }
 
 //spawns bullets with according attributes
 function spawnBullet (xPos, yPos, angle, affili) {
     bullets.push({x: xPos, y: yPos, ang: angle, affil: affili, stat: "live"})
-    console.log(`Bullet spawned @ (${xPos}, ${yPos})`)
 }
 
 //draws player
@@ -206,6 +204,21 @@ function accPlayer () {
     }
 }
 
+function enemiesThink () {
+    enemies.forEach(enemy => {
+        if (enemy.state === "thinking") {
+            let decide = Math.round(Math.random(1, 3))
+            if (decide === 1) {
+                enemy.state = "short"
+            } else if (decide === 2) {
+                enemy.state = "mid"
+            } else {
+                enemy.state = "long"
+            }
+        }
+    })
+}
+
 function enemiesShoot () {
     enemies.forEach(enemy => {
         if (enemy.bulletTimer <= 0 &&  gameRunning) {
@@ -219,6 +232,53 @@ function enemiesShoot () {
 function movePlayer () {
     player.x += player.xVel
     player.y += player.yVel
+}
+
+function moveEnemies () {
+    enemies.forEach(enemy => {
+        let rangeFloor
+        let rangeCeiling
+        if (enemy.state === "short") {
+            rangeFloor = 50
+            rangeCeiling = 150
+        } else if (enemy.state === "mid") {
+            rangeFloor = 150
+            rangeCeiling = 250
+        } else if (enemy.state === "long") {
+            rangeFloor = 250
+            rangeCeiling = 400
+        }
+        //moves enemy closer if player leaves ideal range
+        if (calcDist(enemy.x, enemy.y, player.x, player.y) > rangeCeiling) {
+            if (enemy.x < player.x) {
+                enemy.x += enemySpeed
+            }
+            if (enemy.x > player.x) {
+                enemy.x -= enemySpeed
+            }
+            if (enemy.y < player.y) {
+                enemy.y += enemySpeed
+            }
+            if (enemy.y > player.y) {
+                enemy.y -= enemySpeed
+            }
+        }
+        // moves enemy back if player comes too close
+        if (calcDist(enemy.x, enemy.y, player.x, player.y) < rangeFloor) {
+            if (enemy.x < player.x && enemy.x > 50) {
+                enemy.x -= enemySpeed
+            }
+            if (enemy.x > player.x && enemy.x < 550) {
+                enemy.x += enemySpeed
+            }
+            if (enemy.y < player.y && enemy.y > 50) {
+                enemy.y -= enemySpeed
+            }
+            if (enemy.y > player.y && enemy.y < 550) {
+                enemy.y += enemySpeed
+            }
+        }
+    })
 }
 
 function moveBullets () {
@@ -269,10 +329,13 @@ function draw () {
 
     drawUI()
 
+    enemiesThink()
+
     if (gameRunning === true) {
         accPlayer()
 
         movePlayer()
+        moveEnemies()
         moveBullets()
 
         enemiesShoot()
