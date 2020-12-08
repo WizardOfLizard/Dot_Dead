@@ -11,10 +11,10 @@ let bulletSpeed = 7
 
 let playerSpeed = 5
 
-let enemySpeed = 5
+let enemySpeed = 3
 
 //Counts how many waves have been sent on player, used for difficulty and score
-let waveNum = 0;
+let waveNum = 1
 
 //stores all data on the player
 //postion(x, y), velocity(x, y), number of lives, and reload timer
@@ -97,6 +97,38 @@ function spawnEnemy (xPos, yPos) {
 //spawns bullets with according attributes
 function spawnBullet (xPos, yPos, angle, affili) {
     bullets.push({x: xPos, y: yPos, ang: angle, affil: affili, stat: "live"})
+}
+
+function spawnWave (wave) {
+    let newSpawns = []
+    let spawnNum = 1
+    if (wave === 1) {
+        spawnNum = 1
+    } else if (wave >= 2 && wave <= 3) {
+        spawnNum = 2
+    } else if (wave > 3 && wave <= 5) {
+        spawnNum = 3
+    } else if (wave > 5 && wave <= 7) {
+        spawnNum = 4
+    } else if (wave > 7 && wave <= 12) {
+        spawnNum = 5
+    } else if (wave > 12 && wave <= 20) {
+        spawnNum = 6
+    } else {
+        spawnNum = 7
+    }
+    for (i = 0;i < spawnNum;i ++) {
+        newSpawns.push({x: 300, y: 300})
+    }
+    for (i = 0;i < spawnNum;i ++) {
+        newSpawns[i] = {x: Math.round(Math.random(1)*500 + 50), y: Math.round(Math.random(1)*500 + 50)}
+        if (calcDist(newSpawns[i].x, newSpawns[i].y, player.x, player.y) < 75) {
+            i --
+        }
+    }
+    newSpawns.forEach(spawn => {
+        spawnEnemy(spawn.x, spawn.y)
+    })
 }
 
 //draws player
@@ -292,12 +324,12 @@ function collideBullets () {
     bullets.forEach(bullet => {
         if (bullet.stat === "live") {
             enemies.forEach(enemy => {
-                if (bullet.affil === "friend" && enemy.stat === "alive" && calcDist(bullet.x, bullet.y, enemy.x, enemy.y) <= 35) {
+                if (bullet.affil === "friend" && enemy.stat === "alive" && calcDist(bullet.x, bullet.y, enemy.x, enemy.y) <= 23) {
                     bullet.stat = "dead"
                     enemy.stat = "dead"
                 }
             })
-            if (bullet.affil === "foe" && calcDist(bullet.x, bullet.y, player.x, player.y) <= 35) {
+            if (bullet.affil === "foe" && calcDist(bullet.x, bullet.y, player.x, player.y) <= 23) {
                 bullet.stat = "dead"
                 player.lives --;
             }
@@ -312,11 +344,18 @@ function passBulletTimer () {
     })
 }
 
+function checkNextWave () {
+    if (enemies.length < 1) {
+        waveNum ++
+        spawnWave(waveNum)
+    }
+}
+
 //Makes canvas and is useful for debugging
 function setup () {
     createCanvas(600, 600)
 
-    spawnEnemy(300, 100)
+    spawnWave(waveNum)
 }
 
 //Runs repeatedly, most important stuff happens here
@@ -343,6 +382,8 @@ function draw () {
         collideBullets()
 
         passBulletTimer()
+
+        checkNextWave()
     }
 
     checkBulletBounds()
