@@ -12,6 +12,7 @@ You have three lives and must survive endless waves of red dots.
 Good luck.
 
 --Controls--
-WASD or Arrow Keys move the player
-Click to shoot your bullets, they travel from you in the direction of your mouse
+
+WASD or Arrow Keys move the player.
+Click to shoot your bullets, they travel from you in the direction of your mouse.
 Use space to start, stop, pause, or restart the game.
