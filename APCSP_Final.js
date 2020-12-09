@@ -2,7 +2,7 @@
 
 //self explainitory
 let gameRunning = false
-let gameStarted = false
+let gameState = 0
 
 //variables for design
 let reload = 30
@@ -16,9 +16,11 @@ let enemySpeed = 3
 //Counts how many waves have been sent on player, used for difficulty and score
 let waveNum = 1
 
+let highScore = 0
+
 //stores all data on the player
 //postion(x, y), velocity(x, y), number of lives, and reload timer
-let player = {x:300, y:300, xVel:0, yVel:0, lives:3, bulletTimer:0}
+let player = {x:300, y:300, xVel:0, yVel:0, lives:3, bulletTimer:0, iFrames: 0}
 
 //enemies contains the positions, states, bullet timers, and statuses of all enemies
 //Format: {x:number, y:number, state:thinking/long/mid/short, bulletTimer:number, stat:alive/dead}
@@ -121,7 +123,7 @@ function spawnWave (wave) {
         newSpawns.push({x: 300, y: 300})
     }
     for (i = 0;i < spawnNum;i ++) {
-        newSpawns[i] = {x: Math.round(Math.random(1)*500 + 50), y: Math.round(Math.random(1)*500 + 50)}
+        newSpawns[i] = {x: Math.round(Math.random()*500 + 50), y: Math.round(Math.random()*500 + 50)}
         if (calcDist(newSpawns[i].x, newSpawns[i].y, player.x, player.y) < 75) {
             i --
         }
@@ -135,6 +137,9 @@ function spawnWave (wave) {
 function drawPlayer () {
     noStroke()
     fill(7, 172, 232)
+    if (player.iFrames > 0) {
+        fill(7, 172, 232, 50 + Math.round(Math.random()*100))
+    }
     ellipse(player.x, player.y, 25, 25)
 }
 
@@ -178,7 +183,11 @@ function drawUI () {
     textAlign(RIGHT, TOP)
     textSize(20)
     text(`Wave: ${waveNum}`, 580, 20)
-    if (gameStarted === false) {
+    if (player.iFrames > 0) {
+        fill(255, 0, 0, 2*player.iFrames)
+        rect(0, 0, 600, 600)
+    }
+    if (gameState === 0) {
         fill(150, 150, 150, 100)
         rect(0, 0, 600, 600)
         fill(0, 0, 0)
@@ -187,12 +196,24 @@ function drawUI () {
         text("Press Space to Start", 300, 300)
     } else {
         if (gameRunning === false) {
-            fill(150, 150, 150, 100)
-            rect(0, 0, 600, 600)
-            fill(0, 0, 0)
-            textAlign(CENTER, CENTER)
-            textSize(40)
-            text("Press Space to Resume", 300, 300)
+            if (gameState === 1) {
+                fill(150, 150, 150, 100)
+                rect(0, 0, 600, 600)
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text("Press Space to Resume", 300, 300)
+            } else {
+                fill(150, 150, 150, 100)
+                rect(0, 0, 600, 600)
+                fill(0, 0, 0)
+                textAlign(CENTER, CENTER)
+                textSize(40)
+                text("You died", 300, 225)
+                text(`Your score was: ${waveNum}`, 300, 275)
+                text(`Your high-score is: ${highScore}`, 300, 325)
+                text("Press space to play again", 300, 375)
+            }
         }
     }
 }
@@ -255,7 +276,7 @@ function enemiesShoot () {
     enemies.forEach(enemy => {
         if (enemy.bulletTimer <= 0 &&  gameRunning) {
             spawnBullet(enemy.x, enemy.y, calcAngle(enemy.x, enemy.y, player.x, player.y), "foe")
-            enemy.bulletTimer = reload*2 + Math.round(Math.random(1, 50))
+            enemy.bulletTimer = reload*2 + Math.round(Math.random()*reload)
         }
     })
 }
@@ -264,6 +285,18 @@ function enemiesShoot () {
 function movePlayer () {
     player.x += player.xVel
     player.y += player.yVel
+    if (player.x < 0) {
+        player.xVel = playerSpeed*3
+    }
+    if (player.x > 600) {
+        player.xVel = -playerSpeed*3
+    }
+    if (player.y < 0) {
+        player.yVel = playerSpeed*3
+    }
+    if (player.y > 600) {
+        player.yVel = -playerSpeed*3
+    }
 }
 
 function moveEnemies () {
@@ -331,7 +364,10 @@ function collideBullets () {
             })
             if (bullet.affil === "foe" && calcDist(bullet.x, bullet.y, player.x, player.y) <= 23) {
                 bullet.stat = "dead"
-                player.lives --;
+                if (player.iFrames < 1) {
+                    player.lives --
+                    player.iFrames = 40
+                }
             }
         }
     })
@@ -344,11 +380,40 @@ function passBulletTimer () {
     })
 }
 
+function passPlayerIFrames () {
+    player.iFrames --
+}
+
 function checkNextWave () {
     if (enemies.length < 1) {
         waveNum ++
         spawnWave(waveNum)
     }
+}
+
+function checkPlayerHealth () {
+    if (player.lives < 1) {
+        gameRunning = false
+        gameState = 2
+        if (waveNum > highScore) {
+            highScore = waveNum
+        }
+    }
+}
+
+function restart () {
+    player.x = 300
+    player.y = 300
+    player.xVel = 0
+    player.yVel = 0
+    player.lives = 3
+    player.bulletTimer = 0
+    waveNum = 1
+    enemies = []
+    bullets = []
+    gameState = 1
+    gameRunning = true
+    spawnWave(waveNum)
 }
 
 //Makes canvas and is useful for debugging
@@ -360,7 +425,7 @@ function setup () {
 
 //Runs repeatedly, most important stuff happens here
 function draw () {
-    background(255, 255, 255)
+    background(255-Math.round(Math.random()*5*(3-player.lives)), 255-Math.round(Math.random()*5*(3-player.lives)), 255-Math.round(Math.random()*5*(3-player.lives)))
     
     drawBullets()
     drawEnemies()
@@ -382,11 +447,14 @@ function draw () {
         collideBullets()
 
         passBulletTimer()
+        passPlayerIFrames()
 
         checkNextWave()
     }
 
     checkBulletBounds()
+
+    checkPlayerHealth()
 
     trimBullets()
     trimEnemies()
@@ -394,13 +462,13 @@ function draw () {
 
 function keyTyped () {
     if (keyCode === 32) {
-        if (gameRunning === false) {
+        if (gameRunning === false && gameState < 2) {
             gameRunning = true
-            gameStarted = true
-            console.log("Game playing")
+            gameState = 1
+        } else if (gameState === 2) {
+            restart()
         } else {
             gameRunning = false
-            console.log("Game paused")
         }
     }
 }
