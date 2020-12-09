@@ -408,6 +408,7 @@ function restart () {
     player.yVel = 0
     player.lives = 3
     player.bulletTimer = 0
+    player.iFrames = 0
     waveNum = 1
     enemies = []
     bullets = []
