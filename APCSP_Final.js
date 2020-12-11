@@ -136,6 +136,15 @@ function spawnWave (wave) {
 //draws player
 function drawPlayer () {
     noStroke()
+    fill(35, 194, 45, 150)
+    if (player.iFrames > 0) {
+        fill(35, 194, 45, 50 + Math.round(Math.random()*100))
+    }
+    if (player.bulletTimer > 0) {
+        arc(player.x, player.y, 35, 35, Math.PI/2, Math.PI/2 + 2*Math.PI - 2*Math.PI*player.bulletTimer/reload)
+    } else {
+        ellipse(player.x, player.y, 35, 35)
+    }
     fill(7, 172, 232)
     if (player.iFrames > 0) {
         fill(7, 172, 232, 50 + Math.round(Math.random()*100))
@@ -147,7 +156,7 @@ function drawPlayer () {
 function drawEnemies () {
     if (enemies.length >= 1) {
         noStroke()
-        fill(224, 54, 54)
+        fill(224 - waveNum*10, 54 - waveNum*20, 54 - waveNum*20)
         enemies.forEach(enemy => {
             if (enemy.stat === "alive") {
                 ellipse(enemy.x, enemy.y, 25, 25)
@@ -175,10 +184,15 @@ function drawBullets () {
 
 function drawUI () {
     noStroke()
+    fill(0, 0, 0)
+    rect(0, 0, 600, 5)
+    rect(0, 0, 5, 600)
+    rect(0, 595, 600, 5)
+    rect(595, 0, 5, 600)
     fill(7, 172, 232)
     textAlign(LEFT, TOP)
     textSize(20)
-    text(`Lives: ${player.lives}`, 20, 20)
+    text(`Health: ${player.lives}`, 20, 20)
     fill(224, 54, 54)
     textAlign(RIGHT, TOP)
     textSize(20)
@@ -193,7 +207,7 @@ function drawUI () {
         fill(0, 0, 0)
         textAlign(CENTER, CENTER)
         textSize(40)
-        text("Press Space to Start", 300, 300)
+        text("Press Space to Start", 300, 200)
     } else {
         if (gameRunning === false) {
             if (gameState === 1) {
@@ -285,16 +299,16 @@ function enemiesShoot () {
 function movePlayer () {
     player.x += player.xVel
     player.y += player.yVel
-    if (player.x < 0) {
+    if (player.x < 5) {
         player.xVel = playerSpeed*3
     }
-    if (player.x > 600) {
+    if (player.x > 595) {
         player.xVel = -playerSpeed*3
     }
-    if (player.y < 0) {
+    if (player.y < 5) {
         player.yVel = playerSpeed*3
     }
-    if (player.y > 600) {
+    if (player.y > 595) {
         player.yVel = -playerSpeed*3
     }
 }
